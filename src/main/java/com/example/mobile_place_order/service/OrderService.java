@@ -30,29 +30,15 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
 
-    public OrderDTO addItem(Long orderId, AddToCartRequest request) {
-        Order order;
-        // Logic: Jika ID 0 atau null, buat cart baru
-        if (orderId == null || orderId == 0) {
-            order = new Order();
-            order.setStatus(OrderStatus.DRAFT);
-            order.setCustomerName("Tom Jerry"); 
-            order.setCustomerAddress("Jl. Tali 7 No.9. Jakarta Barat");
-            order.setItems(new ArrayList<>());
-            order = orderRepository.save(order);
-        } else {
-            order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new OrderNotFoundException(orderId));
-            
-            if (order.getStatus() == OrderStatus.PLACED) {
-                throw new OrderOperationException("Cannot modify a placed order.");
-            }
-        }
+    public OrderDTO addToCart(AddToCartRequest request) {
+        String customerName = "Customer " + request.getCustomerId(); // Proxy for customer mapping
+        
+        Order order = orderRepository.findByCustomerNameAndStatus(customerName, OrderStatus.DRAFT)
+                .orElseGet(() -> createNewDraftOrder(customerName));
 
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ProductNotFoundException(request.getProductId()));
 
-        // Cek apakah item sudah ada di cart
         Optional<OrderItem> existingItem = order.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(product.getId()))
                 .findFirst();
@@ -76,6 +62,38 @@ public class OrderService {
         recalculateOrderTotal(order);
         Order savedOrder = orderRepository.save(order);
         return orderMapper.toDTO(savedOrder);
+    }
+
+    public OrderDTO getCart(Long customerId) {
+        String customerName = "Customer " + customerId;
+        Order order = orderRepository.findByCustomerNameAndStatus(customerName, OrderStatus.DRAFT)
+                .orElseThrow(() -> new OrderNotFoundException("No active cart found for customer: " + customerId));
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO checkout(Long customerId) {
+        String customerName = "Customer " + customerId;
+        Order order = orderRepository.findByCustomerNameAndStatus(customerName, OrderStatus.DRAFT)
+                .orElseThrow(() -> new OrderNotFoundException("No active cart found for customer: " + customerId));
+        
+        if (order.getItems().isEmpty()) {
+            throw new OrderOperationException("Cannot checkout an empty cart.");
+        }
+
+        order.setStatus(OrderStatus.PLACED);
+        order.setOrderDate(LocalDateTime.now());
+        
+        Order savedOrder = orderRepository.save(order);
+        return orderMapper.toDTO(savedOrder);
+    }
+
+    private Order createNewDraftOrder(String customerName) {
+        Order order = new Order();
+        order.setStatus(OrderStatus.DRAFT);
+        order.setCustomerName(customerName);
+        order.setCustomerAddress("Jl. Tali 7 No.9. Jakarta Barat"); // Still hardcoded address for now
+        order.setItems(new ArrayList<>());
+        return orderRepository.save(order);
     }
 
     public OrderDTO placeOrder(Long orderId) {

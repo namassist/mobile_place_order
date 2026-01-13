@@ -12,4 +12,7 @@ public class AddToCartRequest {
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
+
+    @NotNull(message = "Customer ID is required")
+    private Long customerId;
 }

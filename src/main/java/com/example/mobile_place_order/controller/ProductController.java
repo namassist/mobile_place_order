@@ -27,8 +27,26 @@ public class ProductController {
         return productService.findAll(PageRequest.of(page, size));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.findById(id));
+    }
+
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDto) {
         return ResponseEntity.ok(productService.create(productDto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductDTO> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductDTO productDto) {
+        return ResponseEntity.ok(productService.update(id, productDto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        productService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

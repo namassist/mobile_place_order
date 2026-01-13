@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "order_items")
 @Data
+@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +28,12 @@ public class OrderItem {
 
     private Integer quantity;
     private BigDecimal subtotal;
+
+    @org.springframework.data.annotation.CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @org.springframework.data.annotation.LastModifiedDate
+    @Column(name = "updated_at")
+    private java.time.LocalDateTime updatedAt;
 }
