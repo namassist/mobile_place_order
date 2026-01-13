@@ -3,6 +3,7 @@ package com.example.mobile_place_order.controller;
 import com.example.mobile_place_order.dto.AddToCartRequest;
 import com.example.mobile_place_order.dto.OrderDTO;
 import com.example.mobile_place_order.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class OrderController {
     @PostMapping("/{orderId}/items")
     public ResponseEntity<OrderDTO> addItemToCart(
             @PathVariable Long orderId,
-            @RequestBody AddToCartRequest request) {
+            @Valid @RequestBody AddToCartRequest request) {
         return ResponseEntity.ok(orderService.addItem(orderId, request));
     }
 
