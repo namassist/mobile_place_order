@@ -2,11 +2,14 @@ package com.example.mobile_place_order.service;
 
 import com.example.mobile_place_order.dto.AddToCartRequest;
 import com.example.mobile_place_order.dto.OrderDTO;
-import com.example.mobile_place_order.dto.OrderItemDTO;
 import com.example.mobile_place_order.entity.Order;
 import com.example.mobile_place_order.entity.OrderItem;
 import com.example.mobile_place_order.entity.OrderStatus;
 import com.example.mobile_place_order.entity.Product;
+import com.example.mobile_place_order.exception.OrderNotFoundException;
+import com.example.mobile_place_order.exception.OrderOperationException;
+import com.example.mobile_place_order.exception.ProductNotFoundException;
+import com.example.mobile_place_order.mapper.OrderMapper;
 import com.example.mobile_place_order.repository.OrderRepository;
 import com.example.mobile_place_order.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,6 +28,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
 
     public OrderDTO addItem(Long orderId, AddToCartRequest request) {
         Order order;
@@ -40,15 +42,15 @@ public class OrderService {
             order = orderRepository.save(order);
         } else {
             order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new RuntimeException("Order not found"));
+                    .orElseThrow(() -> new OrderNotFoundException(orderId));
             
             if (order.getStatus() == OrderStatus.PLACED) {
-                throw new RuntimeException("Cannot modify a placed order.");
+                throw new OrderOperationException("Cannot modify a placed order.");
             }
         }
 
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundException(request.getProductId()));
 
         // Cek apakah item sudah ada di cart
         Optional<OrderItem> existingItem = order.getItems().stream()
@@ -73,28 +75,28 @@ public class OrderService {
 
         recalculateOrderTotal(order);
         Order savedOrder = orderRepository.save(order);
-        return mapToDTO(savedOrder);
+        return orderMapper.toDTO(savedOrder);
     }
 
     public OrderDTO placeOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         if (order.getItems().isEmpty()) {
-            throw new RuntimeException("Cannot place an empty order.");
+            throw new OrderOperationException("Cannot place an empty order.");
         }
 
         order.setStatus(OrderStatus.PLACED);
         order.setOrderDate(LocalDateTime.now());
         
         Order savedOrder = orderRepository.save(order);
-        return mapToDTO(savedOrder);
+        return orderMapper.toDTO(savedOrder);
     }
 
     public OrderDTO getOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        return mapToDTO(order);
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        return orderMapper.toDTO(order);
     }
 
     private void recalculateOrderTotal(Order order) {
@@ -102,28 +104,5 @@ public class OrderService {
                 .map(OrderItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTotalAmount(total);
-    }
-
-    private OrderDTO mapToDTO(Order order) {
-        OrderDTO dto = new OrderDTO();
-        dto.setId(order.getId());
-        dto.setCustomerName(order.getCustomerName());
-        dto.setAddress(order.getCustomerAddress());
-        dto.setTotalAmount(order.getTotalAmount());
-        dto.setStatus(order.getStatus().name());
-        
-        List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
-            OrderItemDTO itemDto = new OrderItemDTO();
-            itemDto.setProductId(item.getProduct().getId());
-            itemDto.setProductName(item.getProductName());
-            itemDto.setType(item.getProductType());
-            itemDto.setPrice(item.getPrice());
-            itemDto.setQuantity(item.getQuantity());
-            itemDto.setSubtotal(item.getSubtotal());
-            return itemDto;
-        }).collect(Collectors.toList());
-
-        dto.setItems(itemDTOs);
-        return dto;
     }
 }

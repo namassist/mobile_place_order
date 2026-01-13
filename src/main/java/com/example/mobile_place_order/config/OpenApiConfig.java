@@ -13,6 +13,9 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
+    @org.springframework.beans.factory.annotation.Value("${openapi.server.url}")
+    private String serverUrl;
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
@@ -28,7 +31,7 @@ public class OpenApiConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8080")
-                                .description("Development server")));
+                                .url(serverUrl)
+                                .description("Server URL")));
     }
 }

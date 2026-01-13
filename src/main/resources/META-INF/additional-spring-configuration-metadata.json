@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "openapi.server.url",
+      "type": "java.lang.String",
+      "description": "The server URL used in the OpenAPI documentation."
+    }
+  ]
+}
