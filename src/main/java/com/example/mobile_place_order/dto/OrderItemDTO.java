@@ -1,14 +1,16 @@
 package com.example.mobile_place_order.dto;
 
-import lombok.Data;
 import java.math.BigDecimal;
 
-@Data
-public class OrderItemDTO {
-    private Long productId;
-    private String productName;
-    private String type;
-    private BigDecimal price;
-    private Integer quantity;
-    private BigDecimal subtotal;
-}
+/**
+ * Order Item Data Transfer Object using Java Record.
+ * Represents a single item in an order/cart.
+ */
+public record OrderItemDTO(
+        Long productId,
+        String productName,
+        String type,
+        BigDecimal price,
+        Integer quantity,
+        BigDecimal subtotal
+) {}

@@ -31,13 +31,13 @@ public class OrderService {
     private final OrderMapper orderMapper;
 
     public OrderDTO addToCart(AddToCartRequest request) {
-        String customerName = "Customer " + request.getCustomerId(); // Proxy for customer mapping
+        String customerName = "Customer " + request.customerId(); 
         
         Order order = orderRepository.findByCustomerNameAndStatus(customerName, OrderStatus.DRAFT)
                 .orElseGet(() -> createNewDraftOrder(customerName));
 
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new ProductNotFoundException(request.getProductId()));
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new ProductNotFoundException(request.productId()));
 
         Optional<OrderItem> existingItem = order.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(product.getId()))
@@ -45,7 +45,7 @@ public class OrderService {
 
         if (existingItem.isPresent()) {
             OrderItem item = existingItem.get();
-            item.setQuantity(item.getQuantity() + request.getQuantity());
+            item.setQuantity(item.getQuantity() + request.quantity());
             item.setSubtotal(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
         } else {
             OrderItem newItem = new OrderItem();
@@ -54,8 +54,8 @@ public class OrderService {
             newItem.setProductName(product.getName());
             newItem.setProductType(product.getType());
             newItem.setPrice(product.getPrice());
-            newItem.setQuantity(request.getQuantity());
-            newItem.setSubtotal(product.getPrice().multiply(new BigDecimal(request.getQuantity())));
+            newItem.setQuantity(request.quantity());
+            newItem.setSubtotal(product.getPrice().multiply(new BigDecimal(request.quantity())));
             order.getItems().add(newItem);
         }
 

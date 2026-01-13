@@ -1,15 +1,17 @@
 package com.example.mobile_place_order.dto;
 
-import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Data
-public class OrderDTO {
-    private Long id;
-    private String customerName;
-    private String address;
-    private BigDecimal totalAmount;
-    private String status;
-    private List<OrderItemDTO> items;
-}
+/**
+ * Order Data Transfer Object using Java Record.
+ * Used for returning order/cart information to clients.
+ */
+public record OrderDTO(
+        Long id,
+        String customerName,
+        String address,
+        BigDecimal totalAmount,
+        String status,
+        List<OrderItemDTO> items
+) {}

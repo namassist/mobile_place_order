@@ -38,9 +38,9 @@ public class ProductService {
         Product existing = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
         
-        existing.setName(dto.getName());
-        existing.setType(dto.getType());
-        existing.setPrice(dto.getPrice());
+        existing.setName(dto.name());
+        existing.setType(dto.type());
+        existing.setPrice(dto.price());
         
         Product saved = productRepository.save(existing);
         return productMapper.toDTO(saved);

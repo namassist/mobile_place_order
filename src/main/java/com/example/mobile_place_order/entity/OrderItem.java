@@ -1,27 +1,46 @@
 package com.example.mobile_place_order.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.math.BigDecimal;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+/**
+ * OrderItem entity with safe Lombok annotations.
+ * - @ToString excludes 'order' and 'product' to prevent infinite recursion
+ * - @EqualsAndHashCode uses only 'id' to prevent LazyInitializationException
+ */
 @Entity
 @Table(name = "order_items")
-@Data
-@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString(exclude = {"order", "product"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EntityListeners(AuditingEntityListener.class)
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    // Snapshot data (jaga-jaga kalau data master produk berubah)
+    // Snapshot data (protects against master product data changes)
     private String productName;
     private String productType;
     private BigDecimal price;
@@ -29,11 +48,11 @@ public class OrderItem {
     private Integer quantity;
     private BigDecimal subtotal;
 
-    @org.springframework.data.annotation.CreatedDate
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-    @org.springframework.data.annotation.LastModifiedDate
+    @LastModifiedDate
     @Column(name = "updated_at")
-    private java.time.LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 }
