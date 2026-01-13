@@ -17,7 +17,7 @@ This is a robust RESTful API designed as the backend service for a "Mobile Place
 This project leverages a modern, production-ready Java stack:
 
 - **Language:** ![Java 17](https://img.shields.io/badge/Java-17-orange)
-- **Framework:** ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green)
+- **Framework:** ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.x-green)
 - **Database:** ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Production-blue) (supports H2 for local testing)
 - **ORM:** Spring Data JPA + Hibernate
 - **Build Tool:** Maven
