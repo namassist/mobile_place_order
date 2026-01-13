@@ -9,7 +9,7 @@ import com.example.mobile_place_order.entity.OrderStatus;
 import com.example.mobile_place_order.entity.Product;
 import com.example.mobile_place_order.repository.OrderRepository;
 import com.example.mobile_place_order.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +22,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
 
     public OrderDTO addItem(Long orderId, AddToCartRequest request) {
         Order order;

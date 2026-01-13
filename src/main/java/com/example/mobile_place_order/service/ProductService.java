@@ -3,16 +3,16 @@ package com.example.mobile_place_order.service;
 import com.example.mobile_place_order.dto.ProductDTO;
 import com.example.mobile_place_order.entity.Product;
 import com.example.mobile_place_order.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     public Page<ProductDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable)

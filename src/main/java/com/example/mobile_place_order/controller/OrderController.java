@@ -4,16 +4,16 @@ import com.example.mobile_place_order.dto.AddToCartRequest;
 import com.example.mobile_place_order.dto.OrderDTO;
 import com.example.mobile_place_order.service.OrderService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDTO> getOrderCart(@PathVariable Long orderId) {
