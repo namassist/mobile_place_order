@@ -123,4 +123,45 @@ public class OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTotalAmount(total);
     }
+
+    public OrderDTO removeFromCart(Long customerId, Long productId) {
+        String customerName = "Customer " + customerId;
+        Order order = orderRepository.findByCustomerNameAndStatus(customerName, OrderStatus.DRAFT)
+                .orElseThrow(() -> new OrderNotFoundException("No active cart found for customer: " + customerId));
+        
+        boolean removed = order.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
+        if (!removed) {
+            throw new OrderOperationException("Product not found in cart: " + productId);
+        }
+        
+        recalculateOrderTotal(order);
+        return orderMapper.toDTO(orderRepository.save(order));
+    }
+
+    public OrderDTO updateItemQuantity(Long customerId, Long productId, Integer quantity) {
+        String customerName = "Customer " + customerId;
+        Order order = orderRepository.findByCustomerNameAndStatus(customerName, OrderStatus.DRAFT)
+                .orElseThrow(() -> new OrderNotFoundException("No active cart found for customer: " + customerId));
+        
+        OrderItem item = order.getItems().stream()
+                .filter(i -> i.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new OrderOperationException("Product not found in cart: " + productId));
+        
+        item.setQuantity(quantity);
+        item.setSubtotal(item.getPrice().multiply(new BigDecimal(quantity)));
+        
+        recalculateOrderTotal(order);
+        return orderMapper.toDTO(orderRepository.save(order));
+    }
+
+    public void clearCart(Long customerId) {
+        String customerName = "Customer " + customerId;
+        Order order = orderRepository.findByCustomerNameAndStatus(customerName, OrderStatus.DRAFT)
+                .orElseThrow(() -> new OrderNotFoundException("No active cart found for customer: " + customerId));
+        
+        order.getItems().clear();
+        order.setTotalAmount(BigDecimal.ZERO);
+        orderRepository.save(order);
+    }
 }
