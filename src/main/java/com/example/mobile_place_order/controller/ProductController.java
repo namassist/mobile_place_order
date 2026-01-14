@@ -1,6 +1,7 @@
 package com.example.mobile_place_order.controller;
 
 import com.example.mobile_place_order.dto.ProductDTO;
+import com.example.mobile_place_order.dto.UpdateProductRequest;
 import com.example.mobile_place_order.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -70,17 +71,17 @@ public class ProductController {
         return ResponseEntity.created(location).body(created);
     }
 
-    @Operation(summary = "Update a product", description = "Updates an existing product by ID")
+    @Operation(summary = "Update a product", description = "Partially updates a product - only provided fields are updated")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid product data"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(
             @Parameter(description = "Product ID") @PathVariable Long id,
-            @Parameter(description = "Updated product data") @Valid @RequestBody ProductDTO productDto) {
-        return ResponseEntity.ok(productService.update(id, productDto));
+            @Parameter(description = "Fields to update") @Valid @RequestBody UpdateProductRequest request) {
+        return ResponseEntity.ok(productService.partialUpdate(id, request));
     }
 
     @Operation(summary = "Delete a product", description = "Deletes a product by ID")
