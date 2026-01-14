@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @Operation(summary = "Get all products", description = "Returns a paginated list of all products")
+    @Operation(summary = "Get all products", description = "Returns a paginated list of all products sorted by ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved products"),
             @ApiResponse(responseCode = "400", description = "Invalid pagination parameters")
@@ -38,7 +39,7 @@ public class ProductController {
     public Page<ProductDTO> getAllProducts(
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
             @Parameter(description = "Page size (1-100)") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
-        return productService.findAll(PageRequest.of(page, size));
+        return productService.findAll(PageRequest.of(page, size, Sort.by("id")));
     }
 
     @Operation(summary = "Get product by ID", description = "Returns a single product by its ID")
