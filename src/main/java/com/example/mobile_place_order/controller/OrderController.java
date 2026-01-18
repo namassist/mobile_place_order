@@ -1,5 +1,6 @@
 package com.example.mobile_place_order.controller;
 
+import com.example.mobile_place_order.dto.DataResponse;
 import com.example.mobile_place_order.dto.OrderDTO;
 import com.example.mobile_place_order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,8 +26,8 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Order not found")
     })
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDTO> getOrder(
+    public ResponseEntity<DataResponse<OrderDTO>> getOrder(
             @Parameter(description = "Order ID") @PathVariable Long orderId) {
-        return ResponseEntity.ok(orderService.getOrder(orderId));
+        return ResponseEntity.ok(DataResponse.of(orderService.getOrder(orderId)));
     }
 }

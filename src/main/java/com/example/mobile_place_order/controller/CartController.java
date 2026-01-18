@@ -1,6 +1,7 @@
 package com.example.mobile_place_order.controller;
 
 import com.example.mobile_place_order.dto.AddToCartRequest;
+import com.example.mobile_place_order.dto.DataResponse;
 import com.example.mobile_place_order.dto.OrderDTO;
 import com.example.mobile_place_order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,9 +32,9 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @PostMapping
-    public ResponseEntity<OrderDTO> addToCart(
+    public ResponseEntity<DataResponse<OrderDTO>> addToCart(
             @Parameter(description = "Add to cart request") @Valid @RequestBody AddToCartRequest request) {
-        return ResponseEntity.ok(orderService.addToCart(request));
+        return ResponseEntity.ok(DataResponse.of(orderService.addToCart(request)));
     }
 
     @Operation(summary = "Get cart contents", description = "Returns the current cart contents for a customer")
@@ -42,9 +43,9 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "No active cart found")
     })
     @GetMapping
-    public ResponseEntity<OrderDTO> getCart(
+    public ResponseEntity<DataResponse<OrderDTO>> getCart(
             @Parameter(description = "Customer ID") @RequestParam Long customerId) {
-        return ResponseEntity.ok(orderService.getCart(customerId));
+        return ResponseEntity.ok(DataResponse.of(orderService.getCart(customerId)));
     }
 
     @Operation(summary = "Checkout cart", description = "Places the order and changes cart status from DRAFT to PLACED")
@@ -54,9 +55,9 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "No active cart found")
     })
     @PostMapping("/checkout")
-    public ResponseEntity<OrderDTO> checkout(
+    public ResponseEntity<DataResponse<OrderDTO>> checkout(
             @Parameter(description = "Customer ID") @RequestParam Long customerId) {
-        return ResponseEntity.ok(orderService.checkout(customerId));
+        return ResponseEntity.ok(DataResponse.of(orderService.checkout(customerId)));
     }
 
     @Operation(summary = "Remove item from cart", description = "Removes a specific product from the cart")
@@ -66,10 +67,10 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "No active cart found")
     })
     @DeleteMapping("/items/{productId}")
-    public ResponseEntity<OrderDTO> removeFromCart(
+    public ResponseEntity<DataResponse<OrderDTO>> removeFromCart(
             @Parameter(description = "Customer ID") @RequestParam Long customerId,
             @Parameter(description = "Product ID to remove") @PathVariable Long productId) {
-        return ResponseEntity.ok(orderService.removeFromCart(customerId, productId));
+        return ResponseEntity.ok(DataResponse.of(orderService.removeFromCart(customerId, productId)));
     }
 
     @Operation(summary = "Update item quantity", description = "Updates the quantity of a product in the cart")
@@ -79,11 +80,11 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "No active cart found")
     })
     @PatchMapping("/items/{productId}")
-    public ResponseEntity<OrderDTO> updateItemQuantity(
+    public ResponseEntity<DataResponse<OrderDTO>> updateItemQuantity(
             @Parameter(description = "Customer ID") @RequestParam Long customerId,
             @Parameter(description = "Product ID") @PathVariable Long productId,
             @Parameter(description = "New quantity (minimum 1)") @RequestParam @Min(1) Integer quantity) {
-        return ResponseEntity.ok(orderService.updateItemQuantity(customerId, productId, quantity));
+        return ResponseEntity.ok(DataResponse.of(orderService.updateItemQuantity(customerId, productId, quantity)));
     }
 
     @Operation(summary = "Clear cart", description = "Removes all items from the cart")

@@ -1,5 +1,7 @@
 package com.example.mobile_place_order.controller;
 
+import com.example.mobile_place_order.dto.DataResponse;
+import com.example.mobile_place_order.dto.PagedResponse;
 import com.example.mobile_place_order.dto.ProductDTO;
 import com.example.mobile_place_order.dto.UpdateProductRequest;
 import com.example.mobile_place_order.service.ProductService;
@@ -12,7 +14,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -37,10 +38,10 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Invalid pagination parameters")
     })
     @GetMapping
-    public Page<ProductDTO> getAllProducts(
+    public PagedResponse<ProductDTO> getAllProducts(
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
             @Parameter(description = "Page size (1-100)") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
-        return productService.findAll(PageRequest.of(page, size, Sort.by("id")));
+        return PagedResponse.fromPage(productService.findAll(PageRequest.of(page, size, Sort.by("id"))));
     }
 
     @Operation(summary = "Get product by ID", description = "Returns a single product by its ID")
@@ -49,9 +50,9 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProduct(
+    public ResponseEntity<DataResponse<ProductDTO>> getProduct(
             @Parameter(description = "Product ID") @PathVariable Long id) {
-        return ResponseEntity.ok(productService.findById(id));
+        return ResponseEntity.ok(DataResponse.of(productService.findById(id)));
     }
 
     @Operation(summary = "Create a new product", description = "Creates a new product and returns the created resource")
@@ -60,7 +61,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Invalid product data")
     })
     @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(
+    public ResponseEntity<DataResponse<ProductDTO>> createProduct(
             @Parameter(description = "Product data") @Valid @RequestBody ProductDTO productDto) {
         ProductDTO created = productService.create(productDto);
         URI location = ServletUriComponentsBuilder
@@ -68,7 +69,7 @@ public class ProductController {
                 .path("/{id}")
                 .buildAndExpand(created.id())
                 .toUri();
-        return ResponseEntity.created(location).body(created);
+        return ResponseEntity.created(location).body(DataResponse.of(created));
     }
 
     @Operation(summary = "Update a product", description = "Partially updates a product - only provided fields are updated")
@@ -78,10 +79,10 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<ProductDTO> updateProduct(
+    public ResponseEntity<DataResponse<ProductDTO>> updateProduct(
             @Parameter(description = "Product ID") @PathVariable Long id,
             @Parameter(description = "Fields to update") @Valid @RequestBody UpdateProductRequest request) {
-        return ResponseEntity.ok(productService.partialUpdate(id, request));
+        return ResponseEntity.ok(DataResponse.of(productService.partialUpdate(id, request)));
     }
 
     @Operation(summary = "Delete a product", description = "Deletes a product by ID")
